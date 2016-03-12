@@ -1,0 +1,8 @@
+[package]
+name = "2048-rust"
+version = "0.1.0"
+authors = ["Federico Giraud <fgiraud@yelp.com>"]
+
+[dependencies]
+rand = "0.3"
+time = "0.1"

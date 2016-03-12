@@ -54,8 +54,9 @@ pub trait World<'a>: Clone {
     }
 }
 
-pub fn add_rand_cell<W>(world: &mut W) -> bool
-    where W: for<'a> World<'a>
+pub fn add_rand_cell<W, T>(world: &mut W) -> bool
+    where W: for<'a> World<'a, Coord = T>,
+          T: Copy,
 {
     let cell = W::to_cell(generate_new_cell_value());
 

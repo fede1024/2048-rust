@@ -5,7 +5,7 @@ mod world;
 use std::cmp;
 use time::PreciseTime;
 
-use world::{Dir, LineWorld16, Tile, World};
+use world::{Dir, LineWorld16, Coord, Tile, World};
 
 fn best_tile<W>(world: &W) -> i32
     where W: for <'a> World<'a>
@@ -42,7 +42,7 @@ fn h1<W>(world: &W) -> i32
 }
 
 fn h2<W>(world: &W) -> i32
-    where W: for<'a> World<'a, Cell = i32>,
+    where W: for<'a> World<'a, Tile = i32>,
 {
     let mut sum = 0;
     for (_, v) in world.iterate() {
@@ -55,9 +55,8 @@ fn h2<W>(world: &W) -> i32
     sum
 }
 
-fn h3<W, T>(world: &W) -> i32
-    where W: for<'a> World<'a, Coord = T, Cell = i32>,
-          T: Copy,
+fn h3<W>(world: &W) -> i32
+    where W: for<'a> World<'a, Tile = i32>
 {
     let mut sum = 0;
     for (_, v) in world.iterate() {
@@ -68,10 +67,9 @@ fn h3<W, T>(world: &W) -> i32
     sum
 }
 
-fn alphabeta<W, T, F>(w: &W, depth: i32, mut alpha: i32, mut beta: i32, max_p: bool, moved: bool, h: &F) -> (Dir, i32)
-    where W: for<'a> World<'a, Coord = T, Cell = i32>,
+fn alphabeta<W, F>(w: &W, depth: i32, mut alpha: i32, mut beta: i32, max_p: bool, moved: bool, h: &F) -> (Dir, i32)
+    where W: for<'a> World<'a, Tile = i32>,
           F: Fn(&W) -> i32,
-          T: Copy,
 {
     if depth <= 0 || !moved {
         return (Dir::Up, h(w));
@@ -126,7 +124,8 @@ fn alphabeta<W, T, F>(w: &W, depth: i32, mut alpha: i32, mut beta: i32, max_p: b
 fn main() {
     let mut world = LineWorld16::new();
 
-    world::add_rand_cell(&mut world);
+    // TODO: fix
+    world::add_rand_cell::<LineWorld16, usize>(&mut world);
     world.print();
 
     let mut count = 0;
@@ -140,7 +139,7 @@ fn main() {
             println!("> {:?} {}", d, v);
             world.print();
         }
-        if !world::add_rand_cell(&mut world) {
+        if !world::add_rand_cell::<LineWorld16, usize>(&mut world) {
             world.print();
             break;
         }

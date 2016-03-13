@@ -26,5 +26,4 @@ build
 while wait_for_change; do
   sleep 0.25;
   build
-  sleep 3;
 done

@@ -26,20 +26,22 @@ pub trait Tile: Copy + Eq + fmt::Display {
     }
 }
 
+pub trait Coord: Copy {
+    fn to_xy(&self) -> (usize, usize);
+    fn from_xy(usize, usize) -> Self;
+}
+
 // TODO: add get size
 pub trait World<'a>: Clone {
-    type Cell: Tile;
-    type Coord;
-    type Iter: Iterator<Item=(Self::Coord, Self::Cell)>;
+    type Tile: Tile;
+    type Coord: Coord;
+    type Iter: Iterator<Item=(Self::Coord, Self::Tile)>;
 
     fn new() -> Self;
-    fn get(&self, usize, usize) -> Self::Cell;
-    fn set(&mut self, Self::Coord, Self::Cell);
+    fn get(&self, usize, usize) -> Self::Tile;
+    fn set(&mut self, Self::Coord, Self::Tile);
     fn do_move(&mut self, Dir) -> bool;
     fn iterate(&'a self) -> Self::Iter;
-
-    fn to_coord(usize, usize) -> Self::Coord;
-    fn from_coord(Self::Coord) -> (usize, usize);
 
     fn print(&self) {
         println!("┌────┬────┬────┬────┐");
@@ -62,8 +64,8 @@ pub trait World<'a>: Clone {
 }
 
 pub fn add_rand_cell<W, T>(world: &mut W) -> bool
-    where W: for<'a> World<'a, Coord = T>,
-          T: Copy,
+    where W: for<'a> World<'a, Coord=T>,
+          T: Coord + Copy,
 {
     let empty_cells = world.iterate().filter(|&(_, tile)| tile.empty()).count();
     if empty_cells == 0 {

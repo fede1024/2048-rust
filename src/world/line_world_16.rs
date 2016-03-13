@@ -1,4 +1,4 @@
-use world::{Dir, Tile, World};
+use world::{Dir, Coord, Tile, World};
 
 #[derive(Copy, Clone, Debug)]
 pub struct LineWorld16 {
@@ -92,8 +92,18 @@ impl Tile for i32 {
     fn from_i32(v: i32) -> i32 { v }
 }
 
+impl Coord for usize {
+    fn from_xy(x: usize, y: usize) -> usize {
+        y * 4 + x
+    }
+
+    fn to_xy(&self) ->  (usize, usize) {
+        (*self % 4, *self / 4)
+    }
+}
+
 impl<'a> World<'a> for LineWorld16 {
-    type Cell = i32;
+    type Tile = i32;
     type Coord = usize;
     type Iter = LineWorld16Iter<'a>;
 
@@ -102,15 +112,7 @@ impl<'a> World<'a> for LineWorld16 {
     }
 
     fn get(&self, x: usize, y: usize) -> i32 {
-        self.data[Self::to_coord(x, y)]
-    }
-
-    fn to_coord(x: usize, y: usize) -> usize {
-        y * 4 + x
-    }
-
-    fn from_coord(c: usize) ->  (usize, usize) {
-        (c % 4, c / 4)
+        self.data[Self::Coord::from_xy(x, y)]
     }
 
     fn set(&mut self, n: usize, val: i32) {

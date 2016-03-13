@@ -10,7 +10,7 @@ pub enum Dir {
     Right,
 }
 
-fn generate_new_cell_value() -> i32 {
+fn generate_new_tile_value() -> i32 {
     match rand::random::<i32>() % 10 {
         9 => 4,
         _ => 2,
@@ -63,18 +63,18 @@ pub trait World<'a>: Clone {
     }
 }
 
-pub fn add_rand_cell<W, T>(world: &mut W) -> bool
+pub fn add_rand_tile<W, T>(world: &mut W) -> bool
     where W: for<'a> World<'a, Coord=T>,
           T: Coord + Copy,
 {
-    let empty_cells = world.iterate().filter(|&(_, tile)| tile.empty()).count();
-    if empty_cells == 0 {
+    let empty_tiles = world.iterate().filter(|&(_, tile)| tile.empty()).count();
+    if empty_tiles == 0 {
         return false;
     }
 
-    let mut p = rand::random::<usize>() % empty_cells;
+    let mut p = rand::random::<usize>() % empty_tiles;
     let (coord, _) = world.iterate().filter(|&(_, tile)| tile.empty()).nth(p).unwrap();
-    world.set(coord, Tile::from_i32(generate_new_cell_value()));
+    world.set(coord, Tile::from_i32(generate_new_tile_value()));
 
     return true;
 }

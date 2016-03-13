@@ -75,13 +75,13 @@ fn alphabeta<W, F>(w: &W, depth: i32, mut alpha: i32, mut beta: i32, max_p: bool
         return (Dir::Up, h(w));
     }
 
-    let mut empty_cells = 0;
+    let mut empty_tiles = 0;
     for (_, v) in w.iterate() {
         if v == 0 {
-            empty_cells += 1;
+            empty_tiles += 1;
         }
     }
-    let new_depth = if empty_cells > 8 { depth / 2 } else { depth };
+    let new_depth = if empty_tiles > 8 { depth / 2 } else { depth };
 
     if max_p {
         let mut best: (Dir, i32) = (Dir::Up, std::i32::MIN);
@@ -125,7 +125,7 @@ fn main() {
     let mut world = LineWorld16::new();
 
     // TODO: fix
-    world::add_rand_cell::<LineWorld16, usize>(&mut world);
+    world::add_rand_tile::<LineWorld16, usize>(&mut world);
     world.print();
 
     let mut count = 0;
@@ -139,7 +139,7 @@ fn main() {
             println!("> {:?} {}", d, v);
             world.print();
         }
-        if !world::add_rand_cell::<LineWorld16, usize>(&mut world) {
+        if !world::add_rand_tile::<LineWorld16, usize>(&mut world) {
             world.print();
             break;
         }

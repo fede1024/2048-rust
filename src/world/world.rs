@@ -39,17 +39,21 @@ pub trait World<'a>: Clone {
     }
 
     fn print(&self) {
-        println!("+----+----+----+----+");
+        println!("┌────┬────┬────┬────┐");
         for y in 0..4 {
             for x in 0..4 {
                 let c = self.get(x, y);
                 if Self::empty_cell(c) {
-                    print!("|    ");
+                    print!("│    ");
                 } else {
-                    print!("|{:4}", c);
+                    print!("│{:4}", c);
                 }
             }
-            println!("|\n+----+----+----+----+");
+            if y < 3 {
+                println!("│\n├────┼────┼────┼────┤");
+            } else {
+                println!("│\n└────┴────┴────┴────┘");
+            }
         }
     }
 }
@@ -58,31 +62,14 @@ pub fn add_rand_cell<W, T>(world: &mut W) -> bool
     where W: for<'a> World<'a, Coord = T>,
           T: Copy,
 {
-    let cell = W::to_cell(generate_new_cell_value());
-
-    let mut empty_cells = 0;
-    for (_, v) in world.iterate() {
-        if W::empty_cell(v) {
-            empty_cells += 1;
-        }
-    }
-
+    let empty_cells = world.iterate().filter(|&(_, tile)| W::empty_cell(tile)).count();
     if empty_cells == 0 {
         return false;
     }
 
-    let mut p = rand::random::<usize>() % empty_cells + 1;
-    let mut final_c = W::to_coord(0, 0);
-    for (c, v) in world.iterate() {
-        if W::empty_cell(v) {
-            p -= 1;
-        }
-        if p == 0 {
-            final_c = c;
-            break;
-        }
-    }
-    world.set(final_c, cell);
+    let mut p = rand::random::<usize>() % empty_cells;
+    let (coord, _) = world.iterate().filter(|&(_, tile)| W::empty_cell(tile)).nth(p).unwrap();
+    world.set(coord, W::to_cell(generate_new_cell_value()));
 
     return true;
 }

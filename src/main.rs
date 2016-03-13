@@ -1,12 +1,11 @@
 extern crate time;
 
 mod world;
-mod line_world_16;
 
-use world::{Dir, World};
-use line_world_16::LineWorld16;
 use std::cmp;
-use time::{PreciseTime};
+use time::PreciseTime;
+
+use world::{Dir, LineWorld16, World};
 
 fn best_tile<W>(world: &W) -> i32
     where W: for <'a> World<'a>
@@ -64,8 +63,6 @@ fn h3<W, T>(world: &W) -> i32
     for (_, v) in world.iterate() {
         if v != 0 {
             sum += v * v;
-        } else {
-            sum += 1024;
         }
     }
     sum
@@ -136,7 +133,7 @@ fn main() {
     let time = PreciseTime::now();
 
     loop {
-        let (d, v) = alphabeta(&world, 7, std::i32::MIN, std::i32::MAX, true, true, &h2);
+        let (d, v) = alphabeta(&world, 9, std::i32::MIN, std::i32::MAX, true, true, &h3);
         world.do_move(d);
         count += 1;
         if count % 30 == 0 {

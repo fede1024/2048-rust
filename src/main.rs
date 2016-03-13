@@ -5,15 +5,15 @@ mod world;
 use std::cmp;
 use time::PreciseTime;
 
-use world::{Dir, LineWorld16, World};
+use world::{Dir, LineWorld16, Tile, World};
 
 fn best_tile<W>(world: &W) -> i32
     where W: for <'a> World<'a>
 {
     let mut best = 0;
     for (_, v) in world.iterate() {
-        if !W::empty_cell(v) {
-            best = cmp::max(W::from_cell(v), best);
+        if !v.empty() {
+            best = cmp::max(v.to_i32(), best);
         }
     }
     best
@@ -24,7 +24,7 @@ fn total<W>(world: &W) -> i32
 {
     let mut total = 0;
     for (_, v) in world.iterate() {
-        total += W::from_cell(v);
+        total += v.to_i32();
     }
     total
 }
@@ -34,7 +34,7 @@ fn h1<W>(world: &W) -> i32
 {
     let mut empty = 0;
     for (_, v) in world.iterate() {
-        if W::empty_cell(v) {
+        if v.empty() {
             empty += 1;
         }
     }

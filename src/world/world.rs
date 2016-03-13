@@ -17,9 +17,18 @@ fn generate_new_cell_value() -> i32 {
     }
 }
 
+pub trait Tile: Copy + Eq + fmt::Display {
+    fn to_i32(&self) -> i32;
+    fn from_i32(i32) -> Self;
+
+    fn empty(&self) -> bool {
+        self.to_i32() == 0
+    }
+}
+
 // TODO: add get size
 pub trait World<'a>: Clone {
-    type Cell: Eq + fmt::Display + Copy;
+    type Cell: Tile;
     type Coord;
     type Iter: Iterator<Item=(Self::Coord, Self::Cell)>;
 
@@ -29,21 +38,15 @@ pub trait World<'a>: Clone {
     fn do_move(&mut self, Dir) -> bool;
     fn iterate(&'a self) -> Self::Iter;
 
-    fn to_cell(v: i32) -> Self::Cell;
-    fn from_cell(Self::Cell) -> i32;
     fn to_coord(usize, usize) -> Self::Coord;
     fn from_coord(Self::Coord) -> (usize, usize);
-
-    fn empty_cell(c: Self::Cell) -> bool {
-        Self::from_cell(c) == 0
-    }
 
     fn print(&self) {
         println!("┌────┬────┬────┬────┐");
         for y in 0..4 {
             for x in 0..4 {
                 let c = self.get(x, y);
-                if Self::empty_cell(c) {
+                if c.empty() {
                     print!("│    ");
                 } else {
                     print!("│{:4}", c);
@@ -62,14 +65,14 @@ pub fn add_rand_cell<W, T>(world: &mut W) -> bool
     where W: for<'a> World<'a, Coord = T>,
           T: Copy,
 {
-    let empty_cells = world.iterate().filter(|&(_, tile)| W::empty_cell(tile)).count();
+    let empty_cells = world.iterate().filter(|&(_, tile)| tile.empty()).count();
     if empty_cells == 0 {
         return false;
     }
 
     let mut p = rand::random::<usize>() % empty_cells;
-    let (coord, _) = world.iterate().filter(|&(_, tile)| W::empty_cell(tile)).nth(p).unwrap();
-    world.set(coord, W::to_cell(generate_new_cell_value()));
+    let (coord, _) = world.iterate().filter(|&(_, tile)| tile.empty()).nth(p).unwrap();
+    world.set(coord, Tile::from_i32(generate_new_cell_value()));
 
     return true;
 }

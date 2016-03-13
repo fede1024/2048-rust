@@ -1,4 +1,4 @@
-use world::{Dir, World};
+use world::{Dir, Tile, World};
 
 #[derive(Copy, Clone, Debug)]
 pub struct LineWorld16 {
@@ -87,6 +87,11 @@ impl<'a> Iterator for LineWorld16Iter<'a> {
     }
 }
 
+impl Tile for i32 {
+    fn to_i32(&self) -> i32 { *self }
+    fn from_i32(v: i32) -> i32 { v }
+}
+
 impl<'a> World<'a> for LineWorld16 {
     type Cell = i32;
     type Coord = usize;
@@ -99,10 +104,6 @@ impl<'a> World<'a> for LineWorld16 {
     fn get(&self, x: usize, y: usize) -> i32 {
         self.data[Self::to_coord(x, y)]
     }
-
-    fn to_cell(v: i32) -> i32 { v }
-
-    fn from_cell(c: i32) -> i32 { c }
 
     fn to_coord(x: usize, y: usize) -> usize {
         y * 4 + x

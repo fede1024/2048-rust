@@ -65,16 +65,16 @@ pub trait World<'a>: Clone {
 
 pub fn add_rand_tile<W, T>(world: &mut W) -> bool
     where W: for<'a> World<'a, Coord=T>,
-          T: Coord + Copy,
+          T: Coord,
 {
-    let empty_tiles = world.iterate().filter(|&(_, tile)| tile.empty()).count();
+    let empty_tiles = world.iterate().filter(|&(_, t)| t.empty()).count();
     if empty_tiles == 0 {
         return false;
     }
 
     let mut p = rand::random::<usize>() % empty_tiles;
-    let (coord, _) = world.iterate().filter(|&(_, tile)| tile.empty()).nth(p).unwrap();
-    world.set(coord, Tile::from_i32(generate_new_tile_value()));
+    let (coord, _) = world.iterate().filter(|&(_, t)| t.empty()).nth(p).unwrap();
+    world.set(coord, Tile::from_i32(generate_new_cell_value()));
 
     return true;
 }

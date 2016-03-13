@@ -123,34 +123,27 @@ fn alphabeta<W, F>(w: &W, depth: i32, mut alpha: i32, mut beta: i32, max_p: bool
 
 fn main() {
     let mut world = LineWorld16::new();
-
-    // TODO: fix
-    world::add_rand_tile::<LineWorld16, usize>(&mut world);
-    world.print();
-
     let mut count = 0;
-    let time = PreciseTime::now();
+    let start_time = PreciseTime::now();
+    let mut last_print = 0;
 
-    loop {
+    // TODO: is there a better way to do this?
+    while world::add_rand_tile::<LineWorld16, usize>(&mut world) {
         let (d, v) = alphabeta(&world, 9, std::i32::MIN, std::i32::MAX, true, true, &h3);
         world.do_move(d);
         count += 1;
-        if count % 30 == 0 {
+        let duration_s = start_time.to(PreciseTime::now()).num_seconds();
+        if duration_s != last_print {
+            last_print = duration_s;
             println!("> {:?} {}", d, v);
             world.print();
-        }
-        if !world::add_rand_tile::<LineWorld16, usize>(&mut world) {
-            world.print();
-            break;
         }
     }
     world.print();
 
-    let duration = time.to(PreciseTime::now());
+    let duration = start_time.to(PreciseTime::now());
     println!("{} moves in {}", count, duration);
     println!("{} moves per second", count / cmp::max(1, duration.num_seconds()));
 
-    let total = total(&world);
-    let best_tile = best_tile(&world);
-    println!("{} total, {} best", total, best_tile);
+    println!("{} total, {} best", total(&world), best_tile(&world));
 }

@@ -74,7 +74,7 @@ pub fn add_rand_tile<W, T>(world: &mut W) -> bool
 
     let p = rand::random::<usize>() % empty_tiles;
     let (coord, _) = world.iterate().filter(|&(_, t)| t.empty()).nth(p).unwrap();
-    world.set(coord, Tile::from_i32(generate_new_cell_value()));
+    world.set(coord, Tile::from_i32(generate_new_tile_value()));
 
     return true;
 }

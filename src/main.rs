@@ -19,27 +19,27 @@ fn total<W>(world: &W) -> i32
     world.iterate().fold(0i32, |sum, (_, v)| sum + v.to_i32())
 }
 
-trait Heuristic<W: for<'a> World<'a>> {
-    fn call(&self, &W) -> i32;
+trait Heuristic {
+    fn call<W: for<'a> World<'a>>(&self, &W) -> i32;
     fn description(&self) -> &'static str;
 }
 
-struct H1;
-impl<W: for<'a> World<'a>> Heuristic<W> for H1 {
-    fn call(&self, world: &W) -> i32 {
+struct HEmpty;
+impl Heuristic for HEmpty {
+    fn call<W: for<'a> World<'a>>(&self, world: &W) -> i32 {
         world.iterate().filter(|&(_, t)| t.empty()).count() as i32
     }
     fn description(&self) -> &'static str {
-        "loL"
+        "Empty count"
     }
 }
 
-struct H2;
-impl<W: for<'a> World<'a>> Heuristic<W> for H2 {
+struct HSum;
+impl Heuristic for HSum {
     fn description(&self) -> &'static str {
-        "loL"
+        "Total sum"
     }
-    fn call(&self, world: &W) -> i32 {
+    fn call<W: for<'a> World<'a>>(&self, world: &W) -> i32 {
         world.iterate().fold(0i32, |sum, (_, v)| {
             let n = v.to_i32();
             if n != 0 { sum + n } else { sum + 256 }
@@ -47,19 +47,19 @@ impl<W: for<'a> World<'a>> Heuristic<W> for H2 {
     }
 }
 
-struct H3;
-impl<W: for<'a> World<'a>> Heuristic<W> for H3 {
+struct HSquared;
+impl Heuristic for HSquared {
     fn description(&self) -> &'static str {
-        "loL"
+        "Squared"
     }
-    fn call(&self, world: &W) -> i32 {
+    fn call<W: for<'a> World<'a>>(&self, world: &W) -> i32 {
         world.iterate().fold(0i32, |sum, (_, v)| sum + v.to_i32().pow(2))
     }
 }
 
 fn alphabeta<W, F>(w: &W, depth: i32, mut alpha: i32, mut beta: i32, max_p: bool, moved: bool, h: &F) -> (Dir, i32)
     where W: for<'a> World<'a>,
-          F: Heuristic<W>,
+          F: Heuristic,
 {
     if depth <= 0 || !moved {
         return (Dir::Up, h.call(w));
@@ -112,14 +112,11 @@ fn main() {
     let mut count = 0;
     let mut last_print = -1;
 
-    //let heuristic: Heuristic<for<'a> World<'a>> = H3;
-    let h = H3;
+    let h = HSquared;
+    let depth = 9;
 
-    //println!("Using heuristic: {}", (h as Heuristic<for <'a> World<'a>>).description().to_string());
-
-    // TODO: is there a better way to do this?
     while world::add_rand_tile::<LineWorld16, usize>(&mut world) {
-        let (d, v) = alphabeta(&world, 9, std::i32::MIN, std::i32::MAX, true, true, &h);
+        let (d, v) = alphabeta(&world, depth, std::i32::MIN, std::i32::MAX, true, true, &h);
         world.do_move(d);
         count += 1;
         let duration_s = start_time.to(PreciseTime::now()).num_seconds();
@@ -128,11 +125,10 @@ fn main() {
             println!("> {:?} {}", d, v);
             world.print();
         }
-        if !world::add_rand_tile::<LineWorld16, usize>(&mut world) {
-            world.print();
-            break;
-        }
     }
+
+    println!("Three depth: {}", depth);
+    println!("Using heuristic: {}\n", h.description().to_string());
     world.print();
 
     let duration = start_time.to(PreciseTime::now());
